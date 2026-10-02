@@ -10,6 +10,15 @@ updates:
         patterns:
           - "com.android.*"
           - "org.jetbrains.kotlin.*"
+    ignore:
+      # Major Gradle / AGP / Kotlin bumps must be done as one coordinated
+      # migration (AGP 9.x needs Gradle 9.x, JDK 17+, Kotlin 2.x).
+      - dependency-name: "*gradle*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "com.android.tools.build:gradle"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.jetbrains.kotlin*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"
