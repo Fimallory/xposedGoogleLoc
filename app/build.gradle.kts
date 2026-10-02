@@ -41,7 +41,7 @@ dependencies {
     // Service lib for RemotePreferences (Binder, must be packaged)
     implementation("io.github.libxposed:service:102.0.0")
 
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.core:core-ktx:1.19.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
