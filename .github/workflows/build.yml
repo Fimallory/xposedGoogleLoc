@@ -29,19 +29,27 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install SDK platform 37 and build-tools 37.0.0
+      - name: Install Android SDK platform 37 and build-tools
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager --install "platforms;android-37.2" "build-tools;37.0.0"
-          # AGP looks for platforms/android-37; the SDK only ships versioned
-          # directory names, so link it into place (idempotent).
-          if [ ! -e "$ANDROID_SDK_ROOT/platforms/android-37" ]; then
-            ln -s "$ANDROID_SDK_ROOT/platforms/android-37.2" "$ANDROID_SDK_ROOT/platforms/android-37"
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT"
+
+          SDKMGR="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMGR" ]; then
+            SDKMGR="$(command -v sdkmanager)"
           fi
-          ls -1 "$ANDROID_SDK_ROOT/platforms"
+          echo "sdkmanager=$SDKMGR"
+
+          yes | "$SDKMGR" --licenses > /dev/null 2>&1 || true
+          "$SDKMGR" --install "platform-tools" "platforms;android-37.2" "build-tools;37.0.0"
+
+          # AGP resolves compileSdk 37 to platforms/android-37, but the SDK
+          # only ships versioned directory names, so link it into place.
+          if [ ! -e "$SDK_ROOT/platforms/android-37" ]; then
+            ln -s "$SDK_ROOT/platforms/android-37.2" "$SDK_ROOT/platforms/android-37"
+          fi
+          ls -1 "$SDK_ROOT/platforms"
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
