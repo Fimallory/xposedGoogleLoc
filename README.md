@@ -104,7 +104,34 @@ cd xposedGoogleLoc
 
 仓库根目录的 `local.properties` 请自行填写 `sdk.dir`，该文件已被 `.gitignore` 忽略。
 
-发布版可执行 `./gradlew :app:assembleRelease`，签名请在本地配置（**不要**把 keystore 或密码提交到仓库）。
+发布版可执行 `./gradlew :app:assembleRelease`。签名配置是可选的：若工程根目录存在 `keystore.properties`（已被 `.gitignore` 忽略），`assembleRelease` 会自动签名并产出 `app-release.apk`；否则产出未签名的 `app-release-unsigned.apk`。
+
+`keystore.properties` 格式：
+
+```properties
+storeFile=/absolute/path/to/release.jks
+storePassword=********
+keyAlias=googleloc
+keyPassword=********
+```
+
+**CI 签名**：在仓库 Settings → Secrets and variables → Actions 中配置以下 4 个 secret，workflow 会自动解码 keystore 并签名 release 包：
+
+| Secret | 说明 |
+|---|---|
+| `KEYSTORE_BASE64` | `release.jks` 的 base64 编码 |
+| `KEYSTORE_PASSWORD` | keystore 密码 |
+| `KEY_ALIAS` | key 别名 |
+| `KEY_PASSWORD` | key 密码 |
+
+生成 base64：
+
+```bash
+base64 -w0 release.jks > keystore.b64
+# 或 PowerShell: [Convert]::ToBase64String([IO.File]::ReadAllBytes("release.jks"))
+```
+
+> **请务必离线备份 keystore 与密码。** 一旦丢失，将无法再为同一应用 ID 发布可覆盖升级的版本。
 
 ---
 

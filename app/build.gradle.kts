@@ -1,7 +1,20 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// Release signing is optional: the keystore is supplied locally through
+// keystore.properties (gitignored) or, in CI, generated from secrets.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) {
+        keystorePropsFile.inputStream().use { load(it) }
+    }
+}
+val hasReleaseSigning = keystorePropsFile.exists() &&
+    keystoreProps.getProperty("storeFile") != null
 
 android {
     namespace = "com.fimall.googleloc"
@@ -12,7 +25,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
     }
 
     buildFeatures {
@@ -28,9 +41,23 @@ android {
         jvmTarget = "17"
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 }
@@ -46,4 +73,3 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 }
-

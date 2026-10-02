@@ -10,6 +10,7 @@ build/
 # ── Local machine config (SDK path, proxy, secrets) ────────────────────
 local.properties
 gradle.properties.local
+keystore.properties
 
 # ── IDE ────────────────────────────────────────────────────────────────
 .idea/
